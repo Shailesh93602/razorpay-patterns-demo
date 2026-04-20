@@ -40,6 +40,13 @@ export default function DemoPage() {
         </p>
 
         <h3 style={{ marginTop: "1.5rem", fontSize: "1rem" }}>Card tab</h3>
+        <p style={{ fontSize: 14, opacity: 0.85 }}>
+          Razorpay test accounts have International Payments disabled by
+          default. The old <code>4111 1111 1111 1111</code> number gets
+          classified as international and rejected with{" "}
+          <em>&quot;International cards are not supported.&quot;</em> Use the{" "}
+          <strong>domestic</strong> test cards below instead.
+        </p>
         <pre
           style={{
             background: "#111827",
@@ -48,11 +55,17 @@ export default function DemoPage() {
             borderRadius: 8,
             fontSize: 13,
           }}
-        >{`Card number   4111 1111 1111 1111
+        >{`Card number   5267 3181 8797 5449   (Mastercard, domestic INR)
+              4386 2894 0766 0153   (Visa, domestic INR)
 Expiry        any future date (e.g. 12/30)
 CVV           any 3 digits (e.g. 123)
 Name          any
-OTP           1111 (or any 4–6 digits)`}</pre>
+OTP           1111 (shown in the modal — NOT a real SMS)`}</pre>
+        <p style={{ fontSize: 13, opacity: 0.7 }}>
+          If you get a real SMS OTP on your phone during test mode, that&apos;s
+          a coincidental Razorpay account notification, not this payment —
+          nothing is actually charged.
+        </p>
 
         <h3 style={{ marginTop: "1.5rem", fontSize: "1rem" }}>UPI tab</h3>
         <p style={{ fontSize: 14, opacity: 0.85 }}>
