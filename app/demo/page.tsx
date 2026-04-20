@@ -1,0 +1,93 @@
+import type { Metadata } from "next";
+import DemoClient from "./DemoClient";
+
+export const metadata: Metadata = {
+  title: "Razorpay Standard Checkout demo",
+  description:
+    "Interactive test of the Razorpay Standard Checkout flow — create-order → Checkout.js → verify-payment.",
+};
+
+export default function DemoPage() {
+  const keyId = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID ?? "";
+
+  return (
+    <main
+      style={{
+        maxWidth: 780,
+        margin: "0 auto",
+        padding: "3rem 1.5rem",
+        lineHeight: 1.6,
+      }}
+    >
+      <h1 style={{ fontSize: "2rem", marginBottom: "0.25rem" }}>
+        Razorpay Standard Checkout — live demo
+      </h1>
+      <p style={{ opacity: 0.75, marginTop: 0 }}>
+        Click Pay, complete the Razorpay test flow, and watch the three-step
+        integration run end-to-end: create-order → Checkout.js modal →
+        verify-payment signature check.
+      </p>
+
+      <DemoClient razorpayKeyId={keyId} />
+
+      <section style={{ marginTop: "3rem" }}>
+        <h2>Razorpay test card</h2>
+        <pre
+          style={{
+            background: "#111827",
+            color: "#e5e7eb",
+            padding: "1rem",
+            borderRadius: 8,
+            fontSize: 13,
+          }}
+        >{`Card number   4111 1111 1111 1111
+Expiry        any future date (e.g. 12/30)
+CVV           any 3 digits (e.g. 123)
+Name          any
+OTP (UPI)     any 4-6 digits`}</pre>
+        <p style={{ opacity: 0.75, fontSize: 14 }}>
+          Test mode only — nothing is actually charged. See{" "}
+          <a
+            href="https://razorpay.com/docs/payments/payments/test-card-details/"
+            style={{ color: "#93c5fd" }}
+          >
+            Razorpay test card docs
+          </a>
+          .
+        </p>
+      </section>
+
+      <section style={{ marginTop: "2rem" }}>
+        <h2>What happens when you click Pay</h2>
+        <ol>
+          <li>
+            Frontend calls <code>POST /api/create-order</code> with{" "}
+            <code>{`{ amount: 100, currency: "INR", receipt: "..." }`}</code>.
+            Backend calls Razorpay API, returns{" "}
+            <code>{`{ order_id, amount, currency }`}</code>.
+          </li>
+          <li>
+            Frontend opens Razorpay Checkout.js modal with the{" "}
+            <code>order_id</code> + your <code>NEXT_PUBLIC_RAZORPAY_KEY_ID</code>.
+          </li>
+          <li>
+            You complete the test payment. Razorpay calls the Checkout.js{" "}
+            <code>handler</code> with <code>razorpay_order_id</code>,{" "}
+            <code>razorpay_payment_id</code>, and <code>razorpay_signature</code>.
+          </li>
+          <li>
+            Frontend forwards those three to <code>POST /api/verify-payment</code>.
+            Backend recomputes HMAC-SHA256(<code>order_id|payment_id</code>,{" "}
+            <code>KEY_SECRET</code>) and constant-time compares. Returns{" "}
+            <code>{`{ ok: true, verified: true }`}</code> or 400.
+          </li>
+          <li>
+            In parallel, Razorpay fires the async webhook at{" "}
+            <code>/api/webhook</code> (authoritative source for billing state —
+            frontend verification is a UX gate, the webhook flips the DB).
+          </li>
+        </ol>
+      </section>
+    </main>
+  );
+}

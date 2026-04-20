@@ -25,20 +25,51 @@ export default function HomePage(): ReactNode {
         .
       </p>
 
+      <p style={{ marginTop: "1rem" }}>
+        <a
+          href="/demo"
+          style={{
+            display: "inline-block",
+            background: "#93c5fd",
+            color: "#0b1020",
+            padding: "0.75rem 1.25rem",
+            borderRadius: 8,
+            fontWeight: 600,
+            textDecoration: "none",
+          }}
+        >
+          → Try the live Standard Checkout demo
+        </a>
+      </p>
+
       <h2 style={{ marginTop: "2rem" }}>Endpoints</h2>
       <ul>
         <li>
-          <code>POST /api/webhook</code> — Razorpay webhook receiver. Verifies
-          the <code>X-Razorpay-Signature</code> header (HMAC-SHA256 of the raw
-          body with your webhook secret), then runs a Redis SETNX guard with
-          a 24h TTL on the payment/order/subscription entity ID so duplicate
-          deliveries short-circuit before the handler runs.
+          <code>POST /api/webhook</code> — Razorpay async webhook receiver.
+          Verifies the <code>X-Razorpay-Signature</code> header (HMAC-SHA256
+          of the raw body with your webhook secret), then runs a Redis SETNX
+          guard with a 24h TTL on the payment/order/subscription entity ID
+          so duplicate deliveries short-circuit before the handler runs.
+          This is the <em>authoritative</em> billing-state source.
         </li>
         <li>
-          <code>POST /api/order</code> — creates a Razorpay Order with a
-          caller-supplied <code>receipt</code> string (idempotency key).
-          Exponential-backoff retry on 5xx / network errors; no retry on
-          4xx (invalid amount, duplicate receipt, etc.).
+          <code>POST /api/create-order</code> — Standard-Checkout order
+          creation endpoint. Request:{" "}
+          <code>{`{ amount: paise, currency: "INR", receipt? }`}</code>, response:{" "}
+          <code>{`{ order_id, amount, currency }`}</code>. Exp-backoff retry
+          on 5xx; fails fast on 4xx.
+        </li>
+        <li>
+          <code>POST /api/verify-payment</code> — client-callback signature
+          verifier. Receives{" "}
+          <code>razorpay_order_id / razorpay_payment_id / razorpay_signature</code>{" "}
+          from Checkout.js success handler, recomputes HMAC-SHA256(
+          <code>order_id|payment_id</code>, <code>KEY_SECRET</code>),
+          constant-time compare. Returns 200 if verified, 400 if tampered.
+        </li>
+        <li>
+          <code>POST /api/order</code> — legacy alias of{" "}
+          <code>/api/create-order</code> (older contract, same behavior).
         </li>
         <li>
           <code>GET /api/health</code> — Redis PING liveness probe.
