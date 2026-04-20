@@ -31,7 +31,15 @@ export default function DemoPage() {
       <DemoClient razorpayKeyId={keyId} />
 
       <section style={{ marginTop: "3rem" }}>
-        <h2>Razorpay test card</h2>
+        <h2>How to test (test mode only)</h2>
+        <p style={{ opacity: 0.85 }}>
+          <strong>Don&apos;t scan the QR with a real UPI app.</strong> Test-mode
+          orders aren&apos;t registered on the live UPI network, so GPay /
+          PhonePe / Paytm will say <em>&quot;invalid UPI id.&quot;</em> Use the
+          test credentials below inside the Razorpay modal instead.
+        </p>
+
+        <h3 style={{ marginTop: "1.5rem", fontSize: "1rem" }}>Card tab</h3>
         <pre
           style={{
             background: "#111827",
@@ -44,14 +52,38 @@ export default function DemoPage() {
 Expiry        any future date (e.g. 12/30)
 CVV           any 3 digits (e.g. 123)
 Name          any
-OTP (UPI)     any 4-6 digits`}</pre>
-        <p style={{ opacity: 0.75, fontSize: 14 }}>
-          Test mode only — nothing is actually charged. See{" "}
+OTP           1111 (or any 4–6 digits)`}</pre>
+
+        <h3 style={{ marginTop: "1.5rem", fontSize: "1rem" }}>UPI tab</h3>
+        <p style={{ fontSize: 14, opacity: 0.85 }}>
+          <strong>Type</strong> one of these into the UPI ID field
+          (don&apos;t scan):
+        </p>
+        <pre
+          style={{
+            background: "#111827",
+            color: "#e5e7eb",
+            padding: "1rem",
+            borderRadius: 8,
+            fontSize: 13,
+          }}
+        >{`success@razorpay   → payment.captured
+failure@razorpay   → payment.failed`}</pre>
+
+        <p style={{ opacity: 0.75, fontSize: 14, marginTop: "1rem" }}>
+          Nothing is actually charged. See{" "}
           <a
             href="https://razorpay.com/docs/payments/payments/test-card-details/"
             style={{ color: "#93c5fd" }}
           >
             Razorpay test card docs
+          </a>{" "}
+          and{" "}
+          <a
+            href="https://razorpay.com/docs/payments/payments/test-card-details/#test-upi-id"
+            style={{ color: "#93c5fd" }}
+          >
+            test UPI IDs
           </a>
           .
         </p>
