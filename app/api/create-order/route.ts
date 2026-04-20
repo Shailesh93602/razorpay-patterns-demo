@@ -80,20 +80,61 @@ export async function POST(request: Request) {
       receipt: order.receipt,
     });
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Unknown error";
-    const statusCode =
-      (error as { statusCode?: number })?.statusCode ??
-      (error as { status?: number })?.status;
+    // Razorpay SDK throws an object shaped like:
+    //   { statusCode: 400, error: { code, description, source, step, reason } }
+    // Its .message is often undefined which made the earlier "Unknown error"
+    // response useless for debugging. Surface the real description + code.
+    const rzpErr = (error ?? {}) as {
+      statusCode?: number;
+      status?: number;
+      message?: string;
+      error?: {
+        code?: string;
+        description?: string;
+        source?: string;
+        step?: string;
+        reason?: string;
+      };
+    };
+    const statusCode = rzpErr.statusCode ?? rzpErr.status;
+    const description = rzpErr.error?.description;
+    const code = rzpErr.error?.code;
+    const message =
+      description ??
+      rzpErr.message ??
+      (error instanceof Error ? error.message : null) ??
+      "Unknown error";
+
+    console.error("Razorpay order.create failed:", {
+      statusCode,
+      code,
+      description,
+      reason: rzpErr.error?.reason,
+      step: rzpErr.error?.step,
+      source: rzpErr.error?.source,
+    });
 
     // Razorpay auth failure
     if (statusCode === 401) {
       return NextResponse.json(
-        { error: "Razorpay authentication failed. Check RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET." },
+        {
+          error:
+            "Razorpay authentication failed. Check RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET.",
+        },
         { status: 401 }
       );
     }
 
-    console.error("Razorpay order.create failed:", { message, statusCode });
+    // Bubble up 4xx with the actual Razorpay description so the client
+    // can show something useful like "amount below minimum" instead of
+    // the catch-all 500.
+    if (statusCode && statusCode >= 400 && statusCode < 500) {
+      return NextResponse.json(
+        { error: message, code },
+        { status: statusCode }
+      );
+    }
+
     return NextResponse.json(
       { error: `Failed to create order: ${message}` },
       { status: 500 }
