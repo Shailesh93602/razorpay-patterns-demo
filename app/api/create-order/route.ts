@@ -41,7 +41,9 @@ export async function POST(request: Request) {
   }
 
   const { amount, currency = "INR", notes } = body;
-  const receipt = body.receipt ?? `rcpt_${randomUUID()}`;
+  // Razorpay caps receipt at 40 chars. `rcpt_${randomUUID()}` = 41 chars
+  // because UUIDv4 is 36. Drop the dashes → 32-char hex + 5-char prefix = 37.
+  const receipt = body.receipt ?? `rcpt_${randomUUID().replace(/-/g, "")}`;
 
   if (typeof amount !== "number" || !Number.isFinite(amount)) {
     return NextResponse.json(
