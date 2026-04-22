@@ -7,7 +7,8 @@ Runnable reference demo of Razorpay webhook idempotency + retry patterns — the
 ## Endpoints
 
 - `POST /api/webhook` — Razorpay webhook receiver. Verifies `X-Razorpay-Signature` (HMAC-SHA256 of raw body with webhook secret). SETNX idempotency guard on the payment/order/subscription entity ID. 24h TTL matches Razorpay's retry window.
-- `POST /api/order` — create a Razorpay Order with a caller-supplied `receipt` (idempotency key). Exp-backoff retry on 5xx; skips 4xx.
+- `POST /api/create-order` — create a Razorpay Order. Request `{ amount (paise), currency, receipt? }`; receipt auto-generated if omitted so double-clicked "Pay" buttons can't create two orders. Exp-backoff retry on 5xx; skips 4xx.
+- `POST /api/verify-payment` — client-callback signature verifier. Recomputes HMAC-SHA256(`order_id|payment_id`, key_secret), constant-time compare.
 - `GET /api/health` — Redis PING.
 
 ## Running locally

@@ -68,10 +68,6 @@ export default function HomePage(): ReactNode {
           constant-time compare. Returns 200 if verified, 400 if tampered.
         </li>
         <li>
-          <code>POST /api/order</code> — legacy alias of{" "}
-          <code>/api/create-order</code> (older contract, same behavior).
-        </li>
-        <li>
           <code>GET /api/health</code> — Redis PING liveness probe.
         </li>
       </ul>

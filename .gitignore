@@ -9,3 +9,6 @@ coverage
 .DS_Store
 *.tsbuildinfo
 .vercel
+
+# Quality audit artifact — kept local
+quality.md
